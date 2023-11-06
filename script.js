@@ -2,6 +2,8 @@ const validChoices = ["Rock", "Paper", "Scissors"];
 let playerWins = 0;
 let computerWins = 0;
 
+window.addEventListener('load', initialize);
+
 function getComputerChoice() {    
     const rand = Math.floor(Math.random() * validChoices.length);        
     return validChoices[rand];
@@ -54,44 +56,41 @@ function evaluatePlay(playerSelection, computerSelection) {
 function playRound(playerSelection, computerSelection) {
     let isWin = evaluatePlay(playerSelection, computerSelection);    
     
+    let roundResult = "";
     if(isWin === undefined) {
-        return "It's a Tie!";
+        roundResult = "It's a Tie!";
     }
-    
-    return isWin 
-        ? `You Win! ${playerSelection} beats ${computerSelection}`
-        : `You Lose! ${computerSelection} beats ${playerSelection}`;
+    else {
+        roundResult =  isWin 
+            ? `You Win! ${playerSelection} beats ${computerSelection}`
+            : `You Lose! ${computerSelection} beats ${playerSelection}`;
+    }
+
+    console.log(roundResult);
+    updateRoundScore(roundResult);
+    updateRunningScore();
 }
 
-function game() {
-    reset();    
-    let currentRound = 0;    
+function updateRoundScore(result) {
+    const scoreCard = document.querySelector('#roundScore');
+    scoreCard.textContent = result;
+}
 
-    // Begin the game
-    while(currentRound < 5) {   
-        announce(`Round ${currentRound + 1} begins!`);
-        // Get player selections
-        var playerSelection = prompt("Make a selection: Rock, Paper, or Scissors")        
-        var computerSelection = getComputerChoice();
+function updateRunningScore() {
+    const runningScore = document.querySelector("#runningScore");
+    runningScore.textContent = `Player Round Wins: ${playerWins}. Computer Round Wins: ${computerWins}`;
 
-        // Announce plays
-        announce(`You chose: ${playerSelection}`);
-        announce(`The computer chose: ${computerSelection}`);
-        
-        // Evaluate the plays
-        var roundResults = playRound(playerSelection, computerSelection);
-        console.log(roundResults);
-
-        // Move onto the next round
-        currentRound++;
-    }
-
-    // Determine Winner
-    if(computerWins > playerWins) console.log("You Lose!");
-    else if(playerWins > computerWins) console.log("You Win!");
-    else {
-        // Extremely rare edge case: both player and computer tie every round
-        console.log("It's a tie!");
+    if(playerWins >= 5 || computerWins >= 5) {
+        if(computerWins > playerWins)  {
+            runningScore.textContent = "GAME OVER! You Lose!";
+        }
+        else if(playerWins > computerWins) {
+            runningScore.textContent = "GAME OVER! You Win!";
+        }
+        else {
+            // Rare edge case: both player and computer tie every round
+            runningScore.textContent = "It's a tie!";
+        }
     }
 }
 
@@ -99,7 +98,23 @@ function announce(msg) {
     console.log(msg);
 }
 
-function reset() {
+function initialize() {
     playerWins = 0;
     computerWins = 0;
+
+    // Add event listeners
+    const buttons = document.querySelectorAll('button');
+    buttons.forEach(btn => {           
+
+        btn.addEventListener('click', () => {                        
+            // Get player selections
+            var playerChoice = btn.textContent;                
+            var computerChoice = getComputerChoice();
+
+            announce(`You chose: ${playerChoice}`);
+            announce(`The computer chose: ${computerChoice}`);
+
+            playRound(playerChoice, computerChoice);
+        });
+    });
 }
